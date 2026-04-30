@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.36324.18
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ILoveIDA_Console", "ILoveIDA\ILoveIDA_Console.csproj", "{B3B8D854-90C8-47C0-A5C9-CD87E59D126C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ILoveIDA_Console", "ILoveIDA_Console\ILoveIDA_Console.csproj", "{B3B8D854-90C8-47C0-A5C9-CD87E59D126C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ILoveIDA", "ILoveIDA\ILoveIDA.csproj", "{7ECA6080-3052-486F-B63C-18601E394AEA}"
 EndProject

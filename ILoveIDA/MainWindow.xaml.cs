@@ -77,6 +77,25 @@ namespace ILoveIDA
                         return;
                     }
                     byte[] bys = client.SendBytes(protSend.DataToBytes());
+                    ProtRecv protRecv = model.FindRecvByName(protSend.Recv);
+                    if(protRecv != null)
+                    {
+                        if (bys.Length != protRecv.Len)
+                        {
+                            Console.WriteLine("响应长度不足");
+                            client.Disconnect();
+                            return;
+                        }
+                        foreach (ProtRecvData s in protRecv.Datas)
+                        {
+                            if (s.Anal[1].ToString() == "!=" && bys[s.Index] != Convert.ToByte(s.Anal[2].ToString(), 16))
+                            {
+                                Console.WriteLine("错误"+s.Anal[3].ToString());
+                                client.Disconnect();
+                                return;
+                            }
+                        }
+                    }
                     //if (bys.Length != model.RecvProts[0].Len)
                     //{
                     //    Console.WriteLine("响应长度不足");

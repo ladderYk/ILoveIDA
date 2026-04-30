@@ -26,6 +26,10 @@ namespace ILoveIDA.Prots
         {
             return SendProts.FirstOrDefault(send => send.Name == name);
         }
+        public ProtRecv FindRecvByName(string name)
+        {
+            return RecvProts.FirstOrDefault(recv => recv.Name == name);
+        }
     }
 
     public class ProtVal
@@ -40,7 +44,7 @@ namespace ILoveIDA.Prots
         public string Name;
 
         public List<string[]> Datas;
-        //public int Recv;
+        public string Recv;
         public List<ProtSendParam> Params;
         public byte[] DataToBytes()
         {
