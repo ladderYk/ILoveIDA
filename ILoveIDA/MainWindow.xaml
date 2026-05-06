@@ -6,8 +6,9 @@
         xmlns:local="clr-namespace:ILoveIDA"
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
-    <Grid>
+    <StackPanel>
         <Button Click="Button_Click" Content="连接"/>
+        <Button Click="Button_Click_1" Content="测试"/>
 
-    </Grid>
+    </StackPanel>
 </Window>

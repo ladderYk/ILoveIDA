@@ -27,6 +27,9 @@ namespace ILoveIDA
         public List<ProtModel> prots = new List<ProtModel>();
         // 根目录地址
         public static string BasePath = AppDomain.CurrentDomain.BaseDirectory;
+
+        TestClient client = new TestClient();
+
         // 配置协议列表
         public static string ProtsFile
         {
@@ -56,15 +59,14 @@ namespace ILoveIDA
         }
         private ProtModel findByName(string name)
         {
-            return prots.FirstOrDefault(prots => prots.Name == name);
+            return prots.FirstOrDefault(prot => prot.Name == name);
         }
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            TestClient client = new TestClient();
             client.ConnectServer();
             Thread.Sleep(1000);
             // 根据类型查询报文
-            ProtModel model = findByName("S7-1200");
+            ProtModel model = findByName("modbusTcp");
             if (model != null)
             {
                 // 判断是否有握手报文
@@ -94,6 +96,12 @@ namespace ILoveIDA
                                 client.Disconnect();
                                 return;
                             }
+                            if (s.Anal[1].ToString() == "==" && bys[s.Index] == Convert.ToByte(s.Anal[2].ToString(), 16))
+                            {
+                                Console.WriteLine("错误" + s.Anal[3].ToString());
+                                client.Disconnect();
+                                return;
+                            }
                         }
                     }
                     //if (bys.Length != model.RecvProts[0].Len)
@@ -108,7 +116,18 @@ namespace ILoveIDA
 
         private void Button_Click_1(object sender, RoutedEventArgs e)
         {
+            if (client.IsConnect)
+            {
+                ProtModel model = findByName("modbusTcp");
 
+                ProtSend protSend = model.FindSendByName("读取");
+                if (protSend == null)
+                {
+                    client.Disconnect();
+                    return;
+                }
+                byte[] bys = client.SendBytes(protSend.DataToBytes());
+            }
         }
     }
 }
