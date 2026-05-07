@@ -12,6 +12,8 @@ namespace ILoveIDA
     {
         private Socket _Client; // 客户端
         public bool IsConnect;
+        public Dictionary<string, object> ValList = new Dictionary<string, object>();
+
         public void ConnectServer()
         {
             _Client = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);

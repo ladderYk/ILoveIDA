@@ -39,8 +39,6 @@ namespace ILoveIDA.Prots
     {
         // 名称
         public string Name;
-        // 字节长度
-        public int Len;
         // 类型
         public string Type;
     }
@@ -94,6 +92,6 @@ namespace ILoveIDA.Prots
         public int Index;
         public int Len;
         public string Type;
-        public List<object> Anal;
+        public List<string> Anal;
     }
 }

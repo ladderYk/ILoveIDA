@@ -70,7 +70,7 @@ namespace ILoveIDA
             if (model != null)
             {
                 // 判断是否有握手报文
-                foreach(string send in model.Hands)
+                foreach (string send in model.Hands)
                 {
                     ProtSend protSend = model.FindSendByName(send);
                     if (protSend == null)
@@ -80,7 +80,7 @@ namespace ILoveIDA
                     }
                     byte[] bys = client.SendBytes(protSend.DataToBytes());
                     ProtRecv protRecv = model.FindRecvByName(protSend.Recv);
-                    if(protRecv != null)
+                    if (protRecv != null)
                     {
                         if (bys.Length != protRecv.Len)
                         {
@@ -92,7 +92,7 @@ namespace ILoveIDA
                         {
                             if (s.Anal[1].ToString() == "!=" && bys[s.Index] != Convert.ToByte(s.Anal[2].ToString(), 16))
                             {
-                                Console.WriteLine("错误"+s.Anal[3].ToString());
+                                Console.WriteLine("错误" + s.Anal[3].ToString());
                                 client.Disconnect();
                                 return;
                             }
@@ -127,6 +127,58 @@ namespace ILoveIDA
                     return;
                 }
                 byte[] bys = client.SendBytes(protSend.DataToBytes());
+                ProtRecv protRecv = model.FindRecvByName(protSend.Recv);
+                if (protRecv != null)
+                {
+
+                    foreach (ProtRecvData s in protRecv.Datas)
+                    {
+                        // 赋值操作
+                        if (s.Anal[0] == "=")
+                        {
+                            // 取数组
+                            byte[] vals = bys.Skip(s.Index).Take(s.Len).ToArray();
+                            if (s.Type == "short")
+                            {
+                                object v;
+                                short v1 = BitConverter.ToInt16(vals.Take(2).Reverse().ToArray(), 0);
+                                if (vals.Length > 2)
+                                {
+                                    List<short> vTemp = new List<short>();
+                                    vTemp.Add(v1);
+                                    for(var i = 1; i < vals.Length /2; i++)
+                                    {
+                                        vTemp.Add(BitConverter.ToInt16(vals.Skip(i*2).Take(2).Reverse().ToArray(), 0));
+                                    }
+                                    v = vTemp;
+                                }
+                                else
+                                {
+                                    v = v1;
+                                }
+                                Console.WriteLine("参数: "+ JsonConvert.SerializeObject(v));
+                                if (client.ValList.ContainsKey(s.Anal[2]))
+                                {
+                                    client.ValList[s.Anal[2]] = v;
+                                }
+                                else
+                                {
+                                    client.ValList.Add(s.Anal[2], v);
+                                }
+                            }
+
+
+                            //client.Disconnect();
+                            //return;
+                        }
+                        //if (s.Anal[1].ToString() == "==" && bys[s.Index] == Convert.ToByte(s.Anal[2].ToString(), 16))
+                        //{
+                        //    Console.WriteLine("错误" + s.Anal[3].ToString());
+                        //    client.Disconnect();
+                        //    return;
+                        //}
+                    }
+                }
             }
         }
     }

@@ -6,12 +6,10 @@
     "Vals": [ //变量
       {
         "Name": "请求次数",
-        "Len": 2,
-        "Type": "int"
+        "Type": "short"
       },
       {
         "Name": "用户Session",
-        "Len": 4,
         "Type": "string"
       }
     ],
@@ -111,8 +109,11 @@
     "Vals": [
       {
         "name": "请求次数",
-        "len": 2,
-        "type": "int"
+        "type": "short"
+      },
+      {
+        "name": "参数",
+        "type": "short"
       }
     ],
     "Hands": [], //握手报文
@@ -132,7 +133,8 @@
           [ "0x00", "地址" ],
           [ "0x00", "数量" ],
           [ "0x02", "数量" ]
-        ]
+        ],
+        "Recv": "返回报文"
       }
     ],
     "RecvProts": [
@@ -147,10 +149,10 @@
             "anal": [ "?", "!=", "0x00", "错误" ]
           },
           {
-            "index": 1,
+            "index": 9,
             "len": 4,
-            "type": "string",
-            "anal": [ "=", "Vals", 1 ]
+            "type": "short",
+            "anal": [ "=", "Vals", "参数" ]
           }
         ]
       }
