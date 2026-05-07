@@ -138,17 +138,20 @@ namespace ILoveIDA
                         {
                             // 取数组
                             byte[] vals = bys.Skip(s.Index).Take(s.Len).ToArray();
-                            if (s.Type == "short")
+                            if (vals.Length < 1)
+                                continue;
+
+                            object v = null;
+                            if (s.Type == "byte")
                             {
-                                object v;
-                                short v1 = BitConverter.ToInt16(vals.Take(2).Reverse().ToArray(), 0);
-                                if (vals.Length > 2)
+                                byte v1 = vals[0];
+                                if (vals.Length > 1)
                                 {
-                                    List<short> vTemp = new List<short>();
+                                    List<byte> vTemp = new List<byte>();
                                     vTemp.Add(v1);
-                                    for(var i = 1; i < vals.Length /2; i++)
+                                    for (int i = 1; i < vals.Length; i++)
                                     {
-                                        vTemp.Add(BitConverter.ToInt16(vals.Skip(i*2).Take(2).Reverse().ToArray(), 0));
+                                        vTemp.Add(vals[i]);
                                     }
                                     v = vTemp;
                                 }
@@ -156,18 +159,61 @@ namespace ILoveIDA
                                 {
                                     v = v1;
                                 }
-                                Console.WriteLine("参数: "+ JsonConvert.SerializeObject(v));
-                                if (client.ValList.ContainsKey(s.Anal[2]))
+
+                            }
+                            if (s.Type == "short")
+                            {
+                                if (vals.Length < 2)
+                                    continue;
+
+                                short v1 = BitConverter.ToInt16(vals.Take(2).Reverse().ToArray(), 0);
+                                if (vals.Length > 2)
                                 {
-                                    client.ValList[s.Anal[2]] = v;
+                                    List<short> vTemp = new List<short>();
+                                    vTemp.Add(v1);
+                                    for (int i = 1; i < vals.Length / 2; i++)
+                                    {
+                                        vTemp.Add(BitConverter.ToInt16(vals.Skip(i * 2).Take(2).Reverse().ToArray(), 0));
+                                    }
+                                    v = vTemp;
                                 }
                                 else
                                 {
-                                    client.ValList.Add(s.Anal[2], v);
+                                    v = v1;
+                                }
+                            }
+                            if (s.Type == "int")
+                            {
+                                if (vals.Length < 4)
+                                    continue;
+                                // modbustcp ABCD
+                                int v1 = BitConverter.ToInt32(vals.Take(4).Reverse().ToArray(), 0);
+                                // CDAB
+                                //int v1 = BitConverter.ToInt32(vals.Take(2).Reverse().ToArray().Concat(vals.Skip(2).Take(2).Reverse().ToArray()).ToArray(), 0);
+                                if (vals.Length > 4)
+                                {
+                                    List<int> vTemp = new List<int>();
+                                    vTemp.Add(v1);
+                                    for (int i = 1; i < vals.Length / 4; i++)
+                                    {
+                                        vTemp.Add(BitConverter.ToInt32(vals.Skip(i * 4).Take(4).Reverse().ToArray(), 0));
+                                    }
+                                    v = vTemp;
+                                }
+                                else
+                                {
+                                    v = v1;
                                 }
                             }
 
-
+                            if (client.ValList.ContainsKey(s.Anal[2]))
+                            {
+                                client.ValList[s.Anal[2]] = v;
+                            }
+                            else
+                            {
+                                client.ValList.Add(s.Anal[2], v);
+                            }
                             //client.Disconnect();
                             //return;
                         }
@@ -180,6 +226,34 @@ namespace ILoveIDA
                     }
                 }
             }
+        }
+        public static string ToHexString(byte[] bytes)
+        {
+            string text = string.Empty;
+            if (bytes != null)
+            {
+                StringBuilder stringBuilder = new StringBuilder();
+                for (int i = 0; i < bytes.Length; i++)
+                {
+                    stringBuilder.Append(bytes[i].ToString("X2") + " ");
+                }
+                text = stringBuilder.ToString();
+            }
+            return text.TrimEnd(new char[] { ' ' });
+        }
+        public static byte[] HexStrTobyte(string hexString)
+        {
+            hexString = hexString.Replace(" ", "");
+            if (hexString.Length % 2 != 0)
+            {
+                hexString += " ";
+            }
+            byte[] array = new byte[hexString.Length / 2];
+            for (int i = 0; i < array.Length; i++)
+            {
+                array[i] = Convert.ToByte(hexString.Substring(i * 2, 2).Trim(), 16);
+            }
+            return array;
         }
     }
 }
