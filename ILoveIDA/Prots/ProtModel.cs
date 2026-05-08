@@ -54,12 +54,12 @@ namespace ILoveIDA.Prots
         public string Recv;
         // 报文参数
         public List<ProtSendParam> Params;
-        public byte[] DataToBytes()
+        public List<byte> DataToBytes()
         {
-            byte[] array = new byte[Datas.Count];
-            for (int i = 0; i < array.Length; i++)
+            List<byte> array = new List<byte>();
+            for (int i = 0; i < Datas.Count; i++)
             {
-                array[i] = Convert.ToByte(Datas[i].Length>0 ? Datas[i][0]: "0", 16);
+                array.Add(Convert.ToByte(Datas[i].Length > 0 ? Datas[i][0] : "0", 16));
             }
             return array;
         }
@@ -71,6 +71,8 @@ namespace ILoveIDA.Prots
         public int Index;
         // 长度
         public int Len;
+        public int PreIndex;
+
         // 类型
         public string Type;
         // 名称

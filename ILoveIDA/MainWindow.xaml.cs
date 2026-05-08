@@ -78,7 +78,7 @@ namespace ILoveIDA
                         client.Disconnect();
                         return;
                     }
-                    byte[] bys = client.SendBytes(protSend.DataToBytes());
+                    byte[] bys = client.SendBytes(protSend.DataToBytes().ToArray());
                     ProtRecv protRecv = model.FindRecvByName(protSend.Recv);
                     if (protRecv != null)
                     {
@@ -120,17 +120,24 @@ namespace ILoveIDA
             {
                 ProtModel model = findByName("modbusTcp");
 
-                ProtSend protSend = model.FindSendByName("读取");
+                ProtSend protSend = model.FindSendByName("写入");
                 if (protSend == null)
                 {
                     client.Disconnect();
                     return;
                 }
-                byte[] bys = client.SendBytes(protSend.DataToBytes());
+                short addr = 100;
+                List<byte> sendByts = protSend.DataToBytes();
+                sendByts.InsertRange(8, BitConverter.GetBytes(addr).Reverse().ToArray());
+                sendByts.InsertRange(10, BitConverter.GetBytes((ushort)400).Reverse().ToArray());
+
+                byte[] bys = client.SendBytes(sendByts.ToArray());
+                    //.CopyTo(bys, 8);
+                
+
                 ProtRecv protRecv = model.FindRecvByName(protSend.Recv);
                 if (protRecv != null)
                 {
-
                     foreach (ProtRecvData s in protRecv.Datas)
                     {
                         // 赋值操作
@@ -142,6 +149,24 @@ namespace ILoveIDA
                                 continue;
 
                             object v = null;
+                            if (s.Type == "bool")
+                            {
+                                bool v1 = vals[0] == 1;
+                                if (vals.Length > 1)
+                                {
+                                    List<bool> vTemp = new List<bool>();
+                                    vTemp.Add(v1);
+                                    for (int i = 1; i < vals.Length; i++)
+                                    {
+                                        vTemp.Add(vals[i] == 1);
+                                    }
+                                    v = vTemp;
+                                }
+                                else
+                                {
+                                    v = v1;
+                                }
+                            }
                             if (s.Type == "byte")
                             {
                                 byte v1 = vals[0];
@@ -159,7 +184,6 @@ namespace ILoveIDA
                                 {
                                     v = v1;
                                 }
-
                             }
                             if (s.Type == "short")
                             {
@@ -174,6 +198,27 @@ namespace ILoveIDA
                                     for (int i = 1; i < vals.Length / 2; i++)
                                     {
                                         vTemp.Add(BitConverter.ToInt16(vals.Skip(i * 2).Take(2).Reverse().ToArray(), 0));
+                                    }
+                                    v = vTemp;
+                                }
+                                else
+                                {
+                                    v = v1;
+                                }
+                            }
+                            if (s.Type == "ushort")
+                            {
+                                if (vals.Length < 2)
+                                    continue;
+
+                                ushort v1 = BitConverter.ToUInt16(vals.Take(2).Reverse().ToArray(), 0);
+                                if (vals.Length > 2)
+                                {
+                                    List<ushort> vTemp = new List<ushort>();
+                                    vTemp.Add(v1);
+                                    for (int i = 1; i < vals.Length / 2; i++)
+                                    {
+                                        vTemp.Add(BitConverter.ToUInt16(vals.Skip(i * 2).Take(2).Reverse().ToArray(), 0));
                                     }
                                     v = vTemp;
                                 }
@@ -205,14 +250,37 @@ namespace ILoveIDA
                                     v = v1;
                                 }
                             }
-
-                            if (client.ValList.ContainsKey(s.Anal[2]))
+                            if (s.Type == "uint")
                             {
-                                client.ValList[s.Anal[2]] = v;
+                                if (vals.Length < 4)
+                                    continue;
+                                // modbustcp ABCD
+                                uint v1 = BitConverter.ToUInt32(vals.Take(4).Reverse().ToArray(), 0);
+                                // CDAB
+                                //int v1 = BitConverter.ToInt32(vals.Take(2).Reverse().ToArray().Concat(vals.Skip(2).Take(2).Reverse().ToArray()).ToArray(), 0);
+                                if (vals.Length > 4)
+                                {
+                                    List<uint> vTemp = new List<uint>();
+                                    vTemp.Add(v1);
+                                    for (int i = 1; i < vals.Length / 4; i++)
+                                    {
+                                        vTemp.Add(BitConverter.ToUInt32(vals.Skip(i * 4).Take(4).Reverse().ToArray(), 0));
+                                    }
+                                    v = vTemp;
+                                }
+                                else
+                                {
+                                    v = v1;
+                                }
+                            }
+
+                            if (client.ValList.ContainsKey(s.Anal[1]))
+                            {
+                                client.ValList[s.Anal[1]] = v;
                             }
                             else
                             {
-                                client.ValList.Add(s.Anal[2], v);
+                                client.ValList.Add(s.Anal[1], v);
                             }
                             //client.Disconnect();
                             //return;
