@@ -85,8 +85,10 @@ namespace ILoveIDA.Prots
         public string Name;
         // 长度
         public int Len;
-        // 处理
-        public List<ProtRecvData> Datas;
+        // 条件
+        public List<ProtRecvCond> Conds;
+        // 变量
+        public List<ProtRecvVal> Vals;
     }
     // 处理接收报文
     public class ProtRecvData
@@ -95,5 +97,21 @@ namespace ILoveIDA.Prots
         public int Len;
         public string Type;
         public List<string> Anal;
+    }
+    // 接收报文条件
+    public class ProtRecvCond
+    {
+        public int Index;
+        public int Len;
+        public string Type;
+        public List<string> Anal;
+    }
+    // 接收报文变量
+    public class ProtRecvVal
+    {
+        public int Index;
+        public int Len;
+        public string Type;
+        public string Val;
     }
 }
