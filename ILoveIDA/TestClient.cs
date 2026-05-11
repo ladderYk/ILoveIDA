@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace ILoveIDA
 {
-    class TestClient
+    public class TestClient
     {
         private Socket _Client; // 客户端
         public bool IsConnect;

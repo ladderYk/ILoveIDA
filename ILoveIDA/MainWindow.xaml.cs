@@ -1,4 +1,5 @@
 ﻿using ILoveIDA.Prots;
+using Nancy.Hosting.Self;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
@@ -28,7 +29,7 @@ namespace ILoveIDA
         // 根目录地址
         public static string BasePath = AppDomain.CurrentDomain.BaseDirectory;
 
-        TestClient client = new TestClient();
+        public static TestClient client = new TestClient();
 
         // 配置协议列表
         public static string ProtsFile
@@ -56,6 +57,10 @@ namespace ILoveIDA
                     }
                 }
             }
+            var url = $"http://localhost";
+
+            NancyHost host = new NancyHost(new Uri(url));
+            host.Start();
         }
         private ProtModel findByName(string name)
         {
@@ -66,7 +71,7 @@ namespace ILoveIDA
             client.ConnectServer();
             Thread.Sleep(1000);
             // 根据类型查询报文
-            ProtModel model = findByName("modbusTcp");
+            ProtModel model = findByName("S7-1200");
             if (model != null)
             {
                 // 判断是否有握手报文
@@ -118,9 +123,9 @@ namespace ILoveIDA
         {
             if (client.IsConnect)
             {
-                ProtModel model = findByName("modbusTcp");
+                ProtModel model = findByName("S7-1200");
 
-                ProtSend protSend = model.FindSendByName("读取bool");
+                ProtSend protSend = model.FindSendByName("读取db区");
                 if (protSend == null)
                 {
                     client.Disconnect();
@@ -129,7 +134,9 @@ namespace ILoveIDA
                 short addr = 100;
                 List<byte> sendByts = protSend.DataToBytes();
 
-                sendByts.InsertRange(8, BitConverter.GetBytes(addr).Reverse().ToArray());
+                //sendByts.InsertRange(8, BitConverter.GetBytes(addr).Reverse().ToArray());
+                // 参数
+                sendByts.InsertRange(23, BitConverter.GetBytes((short)2).Reverse().ToArray());
 
                 byte[] bys = client.SendBytes(sendByts.ToArray());
                 //.CopyTo(bys, 8);
@@ -140,7 +147,6 @@ namespace ILoveIDA
                 {
                     foreach (ProtRecvVal s in protRecv.Vals)
                     {
-                        // 取数组
                         byte[] vals = bys.Skip(s.Index).Take(s.Len).ToArray();
                         if (vals.Length < 1)
                             continue;
@@ -148,22 +154,29 @@ namespace ILoveIDA
                         object v = null;
                         if (s.Type == "bool")
                         {
-                            char[] c = byteTo8BitArr(vals[0]);
+                            // 取数组
+                            byte[] vals1 = bys.Skip(s.Index).Take(s.Len / 8 + 1).ToArray();
+                            if (vals1.Length < 1)
+                                continue;
+                            List<bool> bTemp = new List<bool>();
 
-                            bool v1 = c[0] == '1';
+                            for (int i = 0; i < vals1.Length; i++)
+                            {
+                                char[] c = byteTo8BitArr(vals1[i]);
+
+                                for (int j = 0; j < c.Length; j++)
+                                {
+                                    bTemp.Add(c[j] == '1');
+                                }
+                            }
+
                             if (s.Len > 1)
                             {
-                                List<bool> vTemp = new List<bool>();
-                                vTemp.Add(v1);
-                                for (int i = 1; i < s.Len; i++)
-                                {
-                                    vTemp.Add(c[i] == '1');
-                                }
-                                v = vTemp;
+                                v = bTemp.Take(s.Len).ToList();
                             }
                             else
                             {
-                                v = v1;
+                                v = bTemp[0];
                             }
                         }
                         if (s.Type == "byte")
@@ -253,10 +266,7 @@ namespace ILoveIDA
                         {
                             if (vals.Length < 4)
                                 continue;
-                            // modbustcp ABCD
                             uint v1 = BitConverter.ToUInt32(vals.Take(4).Reverse().ToArray(), 0);
-                            // CDAB
-                            //int v1 = BitConverter.ToInt32(vals.Take(2).Reverse().ToArray().Concat(vals.Skip(2).Take(2).Reverse().ToArray()).ToArray(), 0);
                             if (vals.Length > 4)
                             {
                                 List<uint> vTemp = new List<uint>();
@@ -264,6 +274,46 @@ namespace ILoveIDA
                                 for (int i = 1; i < vals.Length / 4; i++)
                                 {
                                     vTemp.Add(BitConverter.ToUInt32(vals.Skip(i * 4).Take(4).Reverse().ToArray(), 0));
+                                }
+                                v = vTemp;
+                            }
+                            else
+                            {
+                                v = v1;
+                            }
+                        }
+                        if (s.Type == "long")
+                        {
+                            if (vals.Length < 8)
+                                continue;
+                            long v1 = BitConverter.ToInt64(vals.Take(8).Reverse().ToArray(), 0);
+                            if (vals.Length > 8)
+                            {
+                                List<long> vTemp = new List<long>();
+                                vTemp.Add(v1);
+                                for (int i = 1; i < vals.Length / 8; i++)
+                                {
+                                    vTemp.Add(BitConverter.ToInt64(vals.Skip(i * 8).Take(8).Reverse().ToArray(), 0));
+                                }
+                                v = vTemp;
+                            }
+                            else
+                            {
+                                v = v1;
+                            }
+                        }
+                        if (s.Type == "ulong")
+                        {
+                            if (vals.Length < 8)
+                                continue;
+                            ulong v1 = BitConverter.ToUInt64(vals.Take(8).Reverse().ToArray(), 0);
+                            if (vals.Length > 8)
+                            {
+                                List<ulong> vTemp = new List<ulong>();
+                                vTemp.Add(v1);
+                                for (int i = 1; i < vals.Length / 8; i++)
+                                {
+                                    vTemp.Add(BitConverter.ToUInt64(vals.Skip(i * 8).Take(8).Reverse().ToArray(), 0));
                                 }
                                 v = vTemp;
                             }
@@ -292,34 +342,6 @@ namespace ILoveIDA
                     //}
                 }
             }
-        }
-        public static string ToHexString(byte[] bytes)
-        {
-            string text = string.Empty;
-            if (bytes != null)
-            {
-                StringBuilder stringBuilder = new StringBuilder();
-                for (int i = 0; i < bytes.Length; i++)
-                {
-                    stringBuilder.Append(bytes[i].ToString("X2") + " ");
-                }
-                text = stringBuilder.ToString();
-            }
-            return text.TrimEnd(new char[] { ' ' });
-        }
-        public static byte[] HexStrTobyte(string hexString)
-        {
-            hexString = hexString.Replace(" ", "");
-            if (hexString.Length % 2 != 0)
-            {
-                hexString += " ";
-            }
-            byte[] array = new byte[hexString.Length / 2];
-            for (int i = 0; i < array.Length; i++)
-            {
-                array[i] = Convert.ToByte(hexString.Substring(i * 2, 2).Trim(), 16);
-            }
-            return array;
         }
         private static char[] byteTo8BitArr(byte bye)
         {
