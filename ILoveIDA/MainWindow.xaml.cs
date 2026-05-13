@@ -131,6 +131,10 @@ namespace ILoveIDA
                     client.Disconnect();
                     return;
                 }
+                foreach (ProtSendParam param in protSend.Params)
+                {
+
+                }
                 short addr = 100;
                 List<byte> sendByts = protSend.DataToBytes();
 
@@ -147,10 +151,6 @@ namespace ILoveIDA
                 {
                     foreach (ProtRecvVal s in protRecv.Vals)
                     {
-                        byte[] vals = bys.Skip(s.Index).Take(s.Len).ToArray();
-                        if (vals.Length < 1)
-                            continue;
-
                         object v = null;
                         if (s.Type == "bool")
                         {
@@ -179,147 +179,154 @@ namespace ILoveIDA
                                 v = bTemp[0];
                             }
                         }
-                        if (s.Type == "byte")
+                        else
                         {
-                            byte v1 = vals[0];
-                            if (vals.Length > 1)
-                            {
-                                List<byte> vTemp = new List<byte>();
-                                vTemp.Add(v1);
-                                for (int i = 1; i < vals.Length; i++)
-                                {
-                                    vTemp.Add(vals[i]);
-                                }
-                                v = vTemp;
-                            }
-                            else
-                            {
-                                v = v1;
-                            }
-                        }
-                        if (s.Type == "short")
-                        {
-                            if (vals.Length < 2)
+                            byte[] vals = bys.Skip(s.Index).Take(s.Len).ToArray();
+                            if (vals.Length < 1)
                                 continue;
 
-                            short v1 = BitConverter.ToInt16(vals.Take(2).Reverse().ToArray(), 0);
-                            if (vals.Length > 2)
+                            if (s.Type == "byte")
                             {
-                                List<short> vTemp = new List<short>();
-                                vTemp.Add(v1);
-                                for (int i = 1; i < vals.Length / 2; i++)
+                                byte v1 = vals[0];
+                                if (vals.Length > 1)
                                 {
-                                    vTemp.Add(BitConverter.ToInt16(vals.Skip(i * 2).Take(2).Reverse().ToArray(), 0));
+                                    List<byte> vTemp = new List<byte>();
+                                    vTemp.Add(v1);
+                                    for (int i = 1; i < vals.Length; i++)
+                                    {
+                                        vTemp.Add(vals[i]);
+                                    }
+                                    v = vTemp;
                                 }
-                                v = vTemp;
+                                else
+                                {
+                                    v = v1;
+                                }
                             }
-                            else
+                            if (s.Type == "short")
                             {
-                                v = v1;
-                            }
-                        }
-                        if (s.Type == "ushort")
-                        {
-                            if (vals.Length < 2)
-                                continue;
+                                if (vals.Length < 2)
+                                    continue;
 
-                            ushort v1 = BitConverter.ToUInt16(vals.Take(2).Reverse().ToArray(), 0);
-                            if (vals.Length > 2)
-                            {
-                                List<ushort> vTemp = new List<ushort>();
-                                vTemp.Add(v1);
-                                for (int i = 1; i < vals.Length / 2; i++)
+                                short v1 = BitConverter.ToInt16(vals.Take(2).Reverse().ToArray(), 0);
+                                if (vals.Length > 2)
                                 {
-                                    vTemp.Add(BitConverter.ToUInt16(vals.Skip(i * 2).Take(2).Reverse().ToArray(), 0));
+                                    List<short> vTemp = new List<short>();
+                                    vTemp.Add(v1);
+                                    for (int i = 1; i < vals.Length / 2; i++)
+                                    {
+                                        vTemp.Add(BitConverter.ToInt16(vals.Skip(i * 2).Take(2).Reverse().ToArray(), 0));
+                                    }
+                                    v = vTemp;
                                 }
-                                v = vTemp;
-                            }
-                            else
-                            {
-                                v = v1;
-                            }
-                        }
-                        if (s.Type == "int")
-                        {
-                            if (vals.Length < 4)
-                                continue;
-                            // modbustcp ABCD
-                            int v1 = BitConverter.ToInt32(vals.Take(4).Reverse().ToArray(), 0);
-                            // CDAB
-                            //int v1 = BitConverter.ToInt32(vals.Take(2).Reverse().ToArray().Concat(vals.Skip(2).Take(2).Reverse().ToArray()).ToArray(), 0);
-                            if (vals.Length > 4)
-                            {
-                                List<int> vTemp = new List<int>();
-                                vTemp.Add(v1);
-                                for (int i = 1; i < vals.Length / 4; i++)
+                                else
                                 {
-                                    vTemp.Add(BitConverter.ToInt32(vals.Skip(i * 4).Take(4).Reverse().ToArray(), 0));
+                                    v = v1;
                                 }
-                                v = vTemp;
                             }
-                            else
+                            if (s.Type == "ushort")
                             {
-                                v = v1;
-                            }
-                        }
-                        if (s.Type == "uint")
-                        {
-                            if (vals.Length < 4)
-                                continue;
-                            uint v1 = BitConverter.ToUInt32(vals.Take(4).Reverse().ToArray(), 0);
-                            if (vals.Length > 4)
-                            {
-                                List<uint> vTemp = new List<uint>();
-                                vTemp.Add(v1);
-                                for (int i = 1; i < vals.Length / 4; i++)
+                                if (vals.Length < 2)
+                                    continue;
+
+                                ushort v1 = BitConverter.ToUInt16(vals.Take(2).Reverse().ToArray(), 0);
+                                if (vals.Length > 2)
                                 {
-                                    vTemp.Add(BitConverter.ToUInt32(vals.Skip(i * 4).Take(4).Reverse().ToArray(), 0));
+                                    List<ushort> vTemp = new List<ushort>();
+                                    vTemp.Add(v1);
+                                    for (int i = 1; i < vals.Length / 2; i++)
+                                    {
+                                        vTemp.Add(BitConverter.ToUInt16(vals.Skip(i * 2).Take(2).Reverse().ToArray(), 0));
+                                    }
+                                    v = vTemp;
                                 }
-                                v = vTemp;
-                            }
-                            else
-                            {
-                                v = v1;
-                            }
-                        }
-                        if (s.Type == "long")
-                        {
-                            if (vals.Length < 8)
-                                continue;
-                            long v1 = BitConverter.ToInt64(vals.Take(8).Reverse().ToArray(), 0);
-                            if (vals.Length > 8)
-                            {
-                                List<long> vTemp = new List<long>();
-                                vTemp.Add(v1);
-                                for (int i = 1; i < vals.Length / 8; i++)
+                                else
                                 {
-                                    vTemp.Add(BitConverter.ToInt64(vals.Skip(i * 8).Take(8).Reverse().ToArray(), 0));
+                                    v = v1;
                                 }
-                                v = vTemp;
                             }
-                            else
+                            if (s.Type == "int")
                             {
-                                v = v1;
-                            }
-                        }
-                        if (s.Type == "ulong")
-                        {
-                            if (vals.Length < 8)
-                                continue;
-                            ulong v1 = BitConverter.ToUInt64(vals.Take(8).Reverse().ToArray(), 0);
-                            if (vals.Length > 8)
-                            {
-                                List<ulong> vTemp = new List<ulong>();
-                                vTemp.Add(v1);
-                                for (int i = 1; i < vals.Length / 8; i++)
+                                if (vals.Length < 4)
+                                    continue;
+                                // modbustcp ABCD
+                                int v1 = BitConverter.ToInt32(vals.Take(4).Reverse().ToArray(), 0);
+                                // CDAB
+                                //int v1 = BitConverter.ToInt32(vals.Take(2).Reverse().ToArray().Concat(vals.Skip(2).Take(2).Reverse().ToArray()).ToArray(), 0);
+                                if (vals.Length > 4)
                                 {
-                                    vTemp.Add(BitConverter.ToUInt64(vals.Skip(i * 8).Take(8).Reverse().ToArray(), 0));
+                                    List<int> vTemp = new List<int>();
+                                    vTemp.Add(v1);
+                                    for (int i = 1; i < vals.Length / 4; i++)
+                                    {
+                                        vTemp.Add(BitConverter.ToInt32(vals.Skip(i * 4).Take(4).Reverse().ToArray(), 0));
+                                    }
+                                    v = vTemp;
                                 }
-                                v = vTemp;
+                                else
+                                {
+                                    v = v1;
+                                }
                             }
-                            else
+                            if (s.Type == "uint")
                             {
-                                v = v1;
+                                if (vals.Length < 4)
+                                    continue;
+                                uint v1 = BitConverter.ToUInt32(vals.Take(4).Reverse().ToArray(), 0);
+                                if (vals.Length > 4)
+                                {
+                                    List<uint> vTemp = new List<uint>();
+                                    vTemp.Add(v1);
+                                    for (int i = 1; i < vals.Length / 4; i++)
+                                    {
+                                        vTemp.Add(BitConverter.ToUInt32(vals.Skip(i * 4).Take(4).Reverse().ToArray(), 0));
+                                    }
+                                    v = vTemp;
+                                }
+                                else
+                                {
+                                    v = v1;
+                                }
+                            }
+                            if (s.Type == "long")
+                            {
+                                if (vals.Length < 8)
+                                    continue;
+                                long v1 = BitConverter.ToInt64(vals.Take(8).Reverse().ToArray(), 0);
+                                if (vals.Length > 8)
+                                {
+                                    List<long> vTemp = new List<long>();
+                                    vTemp.Add(v1);
+                                    for (int i = 1; i < vals.Length / 8; i++)
+                                    {
+                                        vTemp.Add(BitConverter.ToInt64(vals.Skip(i * 8).Take(8).Reverse().ToArray(), 0));
+                                    }
+                                    v = vTemp;
+                                }
+                                else
+                                {
+                                    v = v1;
+                                }
+                            }
+                            if (s.Type == "ulong")
+                            {
+                                if (vals.Length < 8)
+                                    continue;
+                                ulong v1 = BitConverter.ToUInt64(vals.Take(8).Reverse().ToArray(), 0);
+                                if (vals.Length > 8)
+                                {
+                                    List<ulong> vTemp = new List<ulong>();
+                                    vTemp.Add(v1);
+                                    for (int i = 1; i < vals.Length / 8; i++)
+                                    {
+                                        vTemp.Add(BitConverter.ToUInt64(vals.Skip(i * 8).Take(8).Reverse().ToArray(), 0));
+                                    }
+                                    v = vTemp;
+                                }
+                                else
+                                {
+                                    v = v1;
+                                }
                             }
                         }
 

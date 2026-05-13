@@ -1,0 +1,373 @@
+<template>
+    <div class="agv_main">
+
+        <el-row :gutter="15" style="height: 100%;">
+            <el-col :span="3" style="height: 100%;">
+                <div class="flex">
+                    <span style="font-size: 18px;">
+                        协议列表
+                    </span>
+                    <el-button size="small" @click="addType" type="primary" :icon="Plus">添加协议</el-button>
+                </div>
+                <el-card shadow="never" style="height: calc(100% - 40px);">
+                    <el-tree style="max-width: 600px" :data="list" :props="defaultProps"
+                        @node-click="handleNodeClick" />
+                </el-card>
+            </el-col>
+
+            <el-col :span="21">
+                <el-space style="margin-bottom: 10px;">
+                    <el-input v-model="Prots.Name" placeholder="协议名称" style="width: 200px" />
+                    <el-input v-model="Prots.Group" placeholder="分组" style="width: 200px" />
+                    <el-input v-model="Prots.ConnType" placeholder="通讯方式" style="width: 200px" />
+                </el-space>
+                <el-tabs>
+                    <el-tab-pane label="参数配置">
+                        <ValView :list="Prots.Vals" />
+                    </el-tab-pane>
+                    <el-tab-pane label="发送报文配置">
+                        <SendView :list="Prots.SendProts" />
+                    </el-tab-pane>
+                    <el-tab-pane label="返回报文配置">
+                        <RecvView :list="Prots.RecvProts" />
+                    </el-tab-pane>
+                </el-tabs>
+            </el-col>
+        </el-row>
+    </div>
+</template>
+<script setup>
+
+// 输入参数，名称，手动填写、下拉、选择变量，位数。
+// TODO 两个接口
+// 编辑/修改，禁用/恢复
+import { onMounted, ref, reactive, computed } from "vue";
+import { Close, Link, Plus, Refresh } from '@element-plus/icons-vue'
+import { post, get } from "../utils/request";
+// import { list } from "/public/types.js";
+import SendView from "./send.vue";
+import ValView from "./val.vue";
+import RecvView from "./recv.vue";
+
+let sokect = null;
+const showEdit = ref(false)
+
+const formRef = ref();
+const dialogFormVisible = ref(false);
+const tableData = ref([]);
+const list = ref([]);
+
+const rowIndex = ref(-1);
+const rowID = ref("");
+const form = reactive({
+    id: "",
+    name: "",
+    model: "",
+    ip: "",
+    port: 102,
+    timeout: 0,
+    cycle: 0
+});
+const typeForm = reactive({
+    Index: -1,
+    Value: "",
+    Type: 0,
+    Len: 0
+});
+const ValueLs = computed({
+    get() {
+        return typeForm.Value.split(',').join('\n');
+    },
+    set(newVal) {
+        typeForm.Value = newVal.split('\n').join(',');
+    }
+});
+
+const showConfig = (data, i) => {
+    dialogFormVisible.value = true;
+    var prop = Prots.Configs.find(v => v.Index == i);
+    if (prop) {
+        typeForm.Type = data.Type ? data.Type : 0;
+        typeForm.Value = prop.Value;
+        typeForm.Index = prop.Index;
+        typeForm.Len = prop.Len;
+    } else {
+        typeForm.Type = data.Type ? data.Type : 0;
+        typeForm.Value = "";
+        typeForm.Index = -1;
+        typeForm.Len = 0;
+    }
+}
+const showConfigs = (data, i) => {
+    dialogFormVisible.value = true;
+
+}
+const onSetData = (i, data, cb) => {
+    if (data.Type == 1) {
+        var prop = Prots.Configs.find(v => v.Index == i);
+        data.Value = "Prop";
+        data.Type = 0;
+    } else {
+        Prots.Configs.push({ Index: i });
+        data.Value = "Prop";
+        data.Type = 1;
+    }
+    cb();
+}
+const defaultProps = {
+    children: 'children',
+    label: 'Name',
+}
+/**
+ * COTP根据plc类型，rack slot
+ * 200: 0x10 0x00 | 0x10 0x01
+ * Logo0BA8: 0x01 0x00 | 0x02 0x00
+ * S7200Smart
+ * S71200:
+ * S71500:
+ * S7300:
+ * S7400:
+ * 0x01 0x00 | 0x03 (rack<<5)|slot
+ */
+
+const modbusTcp = [
+    {
+        "Value": "0x00"
+    },
+    {
+        "Name": "",
+        "Value": "0x01"
+    },
+    {
+        "Value": "0x00"
+    },
+    {
+        "Value": "0x00"
+    },
+    {
+        "Value": "0x00"
+    },
+    {
+        "Value": "0x06"
+    },
+    {
+        "Value": "0x01"
+    },
+    {
+        "Value": "0x03"
+    },
+    {
+        "Value": "0x00"
+    },
+    {
+        "Value": "0x00"
+    },
+    {
+        "Value": "0x00"
+    },
+    {
+        "Value": "0x02"
+    }
+];
+const Prots = reactive({ Name: "", Group: "", ConnType: "", SendProts: [], Configs: [], Vals: [], RecvProts: [] });
+
+const props = {
+    label: 'Name',
+    value: 'Name',
+}
+const onAddItem2 = () => {
+    Prots.Configs.push({});
+}
+const onTest = () => {
+    Prots.List = modbusTcp;
+}
+const options = ref([]);
+const handleNodeClick = (data) => {
+    var d = { ...data };
+    Prots.Name = d.Name;
+    Prots.Group = d.Group;
+    Prots.ConnType = d.ConnType;
+    var List = d.SendProts?.map(d => { return { ...d } });
+    var Vals = d.Vals?.map(d => { return { ...d } });
+    var Configs = d.Configs?.map(d => { return { ...d } });
+    var RecvProts = d.RecvProts?.map(d => { return { ...d } });
+    Prots.SendProts = List ? [...List] : [];
+    Prots.Vals = Vals ? [...Vals] : [];
+    Prots.Configs = Configs ? [...Configs] : [];
+    Prots.RecvProts = RecvProts ? [...RecvProts] : [];
+}
+const addType = () => {
+    Prots.Name = "";
+    Prots.SendProts = [];
+    Prots.Configs = [];
+}
+onMounted(() => {
+    // get("/DeviceList").then(data => {
+    //     tableData.value = data;
+    // });
+    fetch("/AGV1.json").then(v => v.json()).then(data => {
+        tableData.value = data;
+    });
+    fetch("/dType.json").then(v => v.json()).then(data => {
+        // options.value = data;
+    });
+    fetch("/Config.json").then(v => v.json()).then(data => {
+        list.value = data;        //options.value = data;
+    });
+    // get("/TypeList").then(data => {
+    //     options.value = data;
+    // });
+
+    sokect = new WebSocket(ws);
+    sokect.onopen = () => {
+        sokect.send(JSON.stringify({ topic: 'online', action: 'subscribe' }));
+
+        //sokect.send(JSON.stringify({ action: 'subscribe', data: 'agvList' }));
+    };
+    sokect.onerror = () => {
+        // setTimeout(() => {
+        //   document.location.reload();
+        // }, 10000);
+    }
+    sokect.onmessage = (message) => {
+        const jmessage = JSON.parse(message.data);
+        var agv = tableData.value.find((v, index, obj) => v.Name == jmessage.name);
+        if (agv == null)
+            return;
+        if (agv.Online != jmessage.online) {
+            agv.Online = jmessage.online;
+        }
+    };
+});
+const deleteRow1 = (index) => {
+    Prots.List.splice(index, 1);
+    // var configIdx = Prots.Configs.findIndex(config => config.Index == index);
+    // Prots.Configs.splice(configIdx, 1);
+    // Prots.Configs.forEach((config, i) => {
+    //     if (config.Index > index) {
+    //         config.Index--;
+    //     }
+    // });
+
+}
+const onAddItem1 = () => {
+    Prots.List.push({});
+}
+const onExpItem1 = () => {
+    console.log(Prots.List);
+}
+const onExpItem2 = () => {
+    var lis = Prots.List.map(({ Value }) => Value);
+    for (var i = 0; i < Prots.Configs.length; i++) {
+        lis.splice(Prots.Configs[i].Index + i, 0, Prots.Configs[i].Value);
+    }
+    console.log(lis);
+    console.log(Prots.List.map(({ Value }) => Value).join(" "));
+}
+const getData = (row) => {
+    fetch("http://127.0.0.1/AGVList").then(d => console.log(d.json()));
+}
+const edit = (index, val) => {
+    rowIndex.value = index;
+    setForm(val);
+}
+const editN = (val) => {
+    rowID.value = val.ID;
+    setForm(val);
+}
+const setForm = (val) => {
+    if (val) {
+        form.id = val.ID;
+        form.name = val.Name;
+        form.model = val.Model;
+        form.ip = val.IP;
+        form.port = val.Port;
+        form.timeout = val.Timeout;
+        form.cycle = val.Cycle;
+    } else {
+        form.id = "";
+        form.name = "";
+        form.model = "";
+        form.ip = "";
+        form.port = 102;
+        form.timeout = 0;
+        form.cycle = 0;
+    }
+}
+const submitForm = (formEl) => {
+    if (!formEl) return
+    formEl.validate((valid) => {
+        if (valid) {
+            if (rowIndex.value == -1) {
+                tableData.value.push({ ...form });
+            } else {
+                var indexData = tableData.value[rowIndex.value];
+                indexData.name = form.name;
+                indexData.model = form.model;
+                indexData.ip = form.ip;
+                indexData.port = form.port;
+                indexData.timeout = form.timeout;
+                indexData.cycle = form.cycle;
+            }
+            resetForm();
+        } else {
+            return false
+        }
+    })
+}
+const resetForm = () => {
+    rowIndex.value = -1;
+    rowID.value = "";
+    setForm();
+}
+const deleteRow = (index) => {
+    tableData.value.splice(index, 1)
+    resetForm();
+}
+const deleteRowN = (row) => {
+    var index = tableData.value.findIndex((v, index, obj) => v.ID = row.ID);
+    tableData.value.splice(index, 1)
+    resetForm();
+}
+
+
+</script>
+<style scoped>
+.agv_main {
+    padding: 18px;
+    height: 100%;
+    box-sizing: border-box;
+}
+
+
+.flex {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 16px;
+}
+
+.flex-center {
+    display: flex;
+    justify-content: center;
+}
+
+.bow {
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+}
+
+.online {
+    background-color: green;
+
+}
+
+.offline {
+    background-color: red;
+}
+
+/* .card-header{
+    padding: 8px 12px
+} */
+</style>
