@@ -65,6 +65,7 @@ namespace ILoveIDA
             {
                 if (agv.IsConnected && agv.Client != null)
                 {
+                    // TODO 变量读取周期
                     ProtModel type = MainWindow.findByName(agv.Type);
                     ProtSend protSend = type.FindSendByName("读取");
                     List<byte> sendByts = protSend.DataToBytes();
