@@ -40,6 +40,11 @@ namespace ILoveIDA
                 _Client.Shutdown(SocketShutdown.Both);
                 //_Client.Close();
                 IsConnect = false;
+                ConnectedCallback onConnectedCallback = this.OnConnectedCallback;
+                if (onConnectedCallback != null)
+                {
+                    onConnectedCallback(agv, "断开连接", false);
+                }
             }
         }
         private void AsyncConnectCallback(IAsyncResult ar)

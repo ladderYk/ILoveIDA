@@ -28,6 +28,8 @@ namespace ILoveIDA
         public static List<DeviceModel> Devices { get; set; } = new List<DeviceModel>();
 
         public static List<ProtModel> prots = new List<ProtModel>();
+        public static bool IsRun = false;
+
         // 根目录地址
         public static string BasePath = AppDomain.CurrentDomain.BaseDirectory;
 
@@ -93,10 +95,20 @@ namespace ILoveIDA
         }
         private void Button_Click(object sender, RoutedEventArgs e)
         {
+            IsRun = true;
             foreach (DeviceModel device in Devices)
             {
                 ResolveDataUtil.OnGetAGVState(device);
                 ResolveDataUtil.OnGetData(device);
+            }
+        }
+        private void Button_Click_1(object sender, RoutedEventArgs e)
+        {
+            IsRun = false;
+
+            foreach (DeviceModel device in Devices)
+            {
+                ResolveDataUtil.Close(device);
             }
         }
         //private void Button_Click(object sender, RoutedEventArgs e)

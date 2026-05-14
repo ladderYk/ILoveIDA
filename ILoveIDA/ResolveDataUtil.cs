@@ -19,8 +19,6 @@ namespace ILoveIDA
         public static void Close(DeviceModel agv)
         {
             agv.Client?.Disconnect();
-            agv.OnlineThread?.Abort();
-            agv.GetDataThread?.Abort();
         }
         public static void OnGetData(DeviceModel agv)
         {
@@ -56,7 +54,8 @@ namespace ILoveIDA
             }).ContinueWith((Func<Task, Task>)async delegate
             {
                 await Task.Delay(agv.Timeout);
-                Online(agv);
+                if (MainWindow.IsRun)
+                    Online(agv);
             });
         }
         private static void GetData(DeviceModel agv)
@@ -115,7 +114,8 @@ namespace ILoveIDA
             }).ContinueWith((Func<Task, Task>)async delegate
             {
                 await Task.Delay(agv.Cycle);
-                GetData(agv);
+                if (MainWindow.IsRun)
+                    GetData(agv);
             });
         }
         internal static void OnConnectedCallback(DeviceModel agv, string msg, bool result)
@@ -143,11 +143,6 @@ namespace ILoveIDA
             {
                 //Utils.AddErr(agv.Name, DateTime.Now.ToString() + "  【" + agv.Name + "】 离线", "0");
                 //agv.LogicalSite = "";
-            }
-            if (agv.GetDataThread != null)
-            {
-                agv.GetDataThread.Abort();
-                Console.WriteLine("心跳线程终止");
             }
         }
 
