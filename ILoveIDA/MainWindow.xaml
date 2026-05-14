@@ -8,7 +8,6 @@
         Title="MainWindow" Height="450" Width="800">
     <StackPanel>
         <Button Click="Button_Click" Content="连接"/>
-        <Button Click="Button_Click_1" Content="测试"/>
 
     </StackPanel>
 </Window>

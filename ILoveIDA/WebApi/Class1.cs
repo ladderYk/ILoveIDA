@@ -25,8 +25,8 @@ namespace ILoveIDA.WebApi
 
             Get("/data", d =>
             {
-                
-                return req("200", "成功",  MainWindow.client.IsConnect? JObject.FromObject(MainWindow.client.ValList): null);
+
+                return req("200", "成功", MainWindow.Devices.Count > 0 ? JObject.FromObject(MainWindow.Devices[0].ValList) : null);
                 //return JsonConvert.SerializeObject(new { data = MainWindow.devices });
             });
         }

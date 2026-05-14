@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ILoveIDA.Prots;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -10,16 +11,27 @@ namespace ILoveIDA
 {
     public class TestClient
     {
+        public delegate void ConnectedCallback(DeviceModel agv, string msg, bool result);
+        public event ConnectedCallback OnConnectedCallback;
+
         private Socket _Client; // 客户端
         public bool IsConnect;
-        public Dictionary<string, object> ValList = new Dictionary<string, object>();
+        private DeviceModel agv;
+        public TestClient(DeviceModel _agv)
+        {
+            agv = _agv;
+            OnConnectedCallback += ResolveDataUtil.OnConnectedCallback;
 
+        }
         public void ConnectServer()
         {
+            if (_Client != null)
+            {
+                _Client.Dispose();
+            }
             _Client = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-            _Client.ReceiveTimeout = 1000;
             _Client.SendTimeout = 1000;
-            _Client.BeginConnect(new IPEndPoint(IPAddress.Parse("127.0.0.1"),102), AsyncConnectCallback, _Client);
+            _Client.BeginConnect(new IPEndPoint(IPAddress.Parse(agv.IP),agv.Port), AsyncConnectCallback, _Client);
         }
         public void Disconnect()
         {
@@ -42,6 +54,11 @@ namespace ILoveIDA
                 if (_Client.Connected)
                 {
                     _Client.EndConnect(ar);
+                    ConnectedCallback onConnectedCallback = this.OnConnectedCallback;
+                    if (onConnectedCallback != null)
+                    {
+                        onConnectedCallback(agv, "连接成功:", true);
+                    }
                     //Receive(_Client);
                     Console.WriteLine("连接成功!");
                     IsConnect = true;
