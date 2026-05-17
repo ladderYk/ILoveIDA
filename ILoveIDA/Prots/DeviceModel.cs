@@ -23,14 +23,14 @@ namespace ILoveIDA.Prots
 
         public bool IsConnected;
         public string JsonData;
+        // 变量
+        public List<DeviceVal> Vals;
 
         public Dictionary<string, object> ValList = new Dictionary<string, object>();
-     
+        public Dictionary<string, object> ValLists = new Dictionary<string, object>();
+
         public bool IsReg;
         public TestClient Client;
-
-        public Thread OnlineThread;
-        public Thread GetDataThread;
 
         public void SetVal(DeviceModel device)
         {
@@ -42,5 +42,33 @@ namespace ILoveIDA.Prots
             this.Timeout = device.Timeout;
             this.Cycle = device.Cycle;
         }
+        public List<DeviceData> Datas;
+    }
+    // 变量
+    public class DeviceData
+    {
+        // 报文名称
+        public string SendPort;
+        // 类型
+        public Dictionary<string, object> Params;
+        public List<DeviceRecvVal> Vals;
+
+    }
+
+    // 变量
+    public class DeviceVal
+    {
+        // 名称
+        public string Name;
+        // 类型
+        public string Type;
+    }
+    // 接收报文变量
+    public class DeviceRecvVal
+    {
+        public int Index;
+        public int Len;
+        public string Type;
+        public string Val;
     }
 }

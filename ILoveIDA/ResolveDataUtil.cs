@@ -65,51 +65,77 @@ namespace ILoveIDA
                 if (agv.IsConnected && agv.Client != null)
                 {
                     // TODO 变量读取周期
+
+                    // 根据类型查询协议
                     ProtModel type = MainWindow.findByName(agv.Type);
-                    ProtSend protSend = type.FindSendByName("读取");
-                    List<byte> sendByts = protSend.DataToBytes();
-                    short addr = 100;
-                    sendByts.InsertRange(8, BitConverter.GetBytes(addr).Reverse().ToArray());
-
-                    byte[] bys = agv.Client.SendBytes(sendByts.ToArray());
-                    ProtRecv protRecv = type.FindRecvByName(protSend.Recv);
-                    if (protRecv != null)
+                    if (type != null)
                     {
-                        foreach (ProtRecvVal s in protRecv.Vals)
+                        // 遍历数据读取列表
+                        foreach (DeviceData data in agv.Datas)
                         {
-                            object v = null;
-
-                            #region 直接读byte
-                            byte[] vals = bys.Skip(s.Index).Take(2).ToArray();
-                            if (vals.Length < 1)
-                                continue;
-
-                            byte v1 = vals[0];
-                            if (vals.Length > 1)
+                            // 根据名称查询报文
+                            ProtSend protSend = type.FindSendByName(data.SendPort);
+                            List<byte> sendByts = protSend.DataToBytes();
+                            // 根据参数配置报文
+                            foreach (string param in data.Params.Keys)
                             {
-                                List<byte> vTemp = new List<byte>();
-                                vTemp.Add(v1);
-                                for (int i = 1; i < vals.Length; i++)
+                                ProtSendParam sendParam = protSend.FindParamByName(param);
+                                if (sendParam != null)
                                 {
-                                    vTemp.Add(vals[i]);
+                                    short val = Convert.ToInt16(data.Params[param]);
+                                    sendByts.InsertRange(sendParam.Index, BitConverter.GetBytes(val).Reverse().ToArray());
                                 }
-                                v = vTemp;
                             }
-                            else
+                            // 发送并接收数据
+                            byte[] bys = agv.Client.SendBytes(sendByts.ToArray());
+                            if (bys == null)
+                                continue;
+                            // 判断条件，解析结果
+                            ProtRecv protRecv = type.FindRecvByName(protSend.Recv);
+                            if (protRecv != null)
                             {
-                                v = v1;
+
                             }
-                            #endregion
-                            if (agv.ValList.ContainsKey(s.Val))
+                            // 遍历查询结果
+                            foreach (DeviceRecvVal s in data.Vals)
                             {
-                                agv.ValList[s.Val] = v;
-                            }
-                            else
-                            {
-                                agv.ValList.Add(s.Val, v);
+                                object v = null;
+
+                                #region 直接读byte
+                                byte[] vals = bys.Skip(s.Index).Take(s.Len).ToArray();
+                                if (vals.Length < 1)
+                                    continue;
+
+                                byte v1 = vals[0];
+                                if (vals.Length > 1)
+                                {
+                                    List<byte> vTemp = new List<byte>();
+                                    vTemp.Add(v1);
+                                    for (int i = 1; i < vals.Length; i++)
+                                    {
+                                        vTemp.Add(vals[i]);
+                                    }
+                                    v = vTemp;
+                                }
+                                else
+                                {
+                                    v = v1;
+                                }
+                                #endregion
+                                if (agv.ValList.ContainsKey(s.Val))
+                                {
+                                    agv.ValList[s.Val] = v;
+                                }
+                                else
+                                {
+                                    agv.ValList.Add(s.Val, v);
+                                }
                             }
                         }
+                        //if (!agv.ParamList.ContainsKey(data.Params.Keys.First()))
+                        //    agv.ParamList.Add(data.Params.Keys.First(), sendParam != null);
                     }
+
                 }
             }).ContinueWith((Func<Task, Task>)async delegate
             {

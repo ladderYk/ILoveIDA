@@ -7,6 +7,26 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ILoveIDA_Console", "ILoveID
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ILoveIDA", "ILoveIDA\ILoveIDA.csproj", "{7ECA6080-3052-486F-B63C-18601E394AEA}"
 EndProject
+Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "ILoveIDA_WEB", "ILoveIDA_WEB\", "{8F99CA46-E46E-48DE-B279-8C35844D4658}"
+	ProjectSection(WebsiteProperties) = preProject
+		TargetFrameworkMoniker = ".NETFramework,Version%3Dv4.0"
+		Debug.AspNetCompiler.VirtualPath = "/localhost_58619"
+		Debug.AspNetCompiler.PhysicalPath = "ILoveIDA_WEB\"
+		Debug.AspNetCompiler.TargetPath = "PrecompiledWeb\localhost_58619\"
+		Debug.AspNetCompiler.Updateable = "true"
+		Debug.AspNetCompiler.ForceOverwrite = "true"
+		Debug.AspNetCompiler.FixedNames = "false"
+		Debug.AspNetCompiler.Debug = "True"
+		Release.AspNetCompiler.VirtualPath = "/localhost_58619"
+		Release.AspNetCompiler.PhysicalPath = "ILoveIDA_WEB\"
+		Release.AspNetCompiler.TargetPath = "PrecompiledWeb\localhost_58619\"
+		Release.AspNetCompiler.Updateable = "true"
+		Release.AspNetCompiler.ForceOverwrite = "true"
+		Release.AspNetCompiler.FixedNames = "false"
+		Release.AspNetCompiler.Debug = "False"
+		VWDPort = "58619"
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +41,10 @@ Global
 		{7ECA6080-3052-486F-B63C-18601E394AEA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7ECA6080-3052-486F-B63C-18601E394AEA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7ECA6080-3052-486F-B63C-18601E394AEA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8F99CA46-E46E-48DE-B279-8C35844D4658}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8F99CA46-E46E-48DE-B279-8C35844D4658}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8F99CA46-E46E-48DE-B279-8C35844D4658}.Release|Any CPU.ActiveCfg = Debug|Any CPU
+		{8F99CA46-E46E-48DE-B279-8C35844D4658}.Release|Any CPU.Build.0 = Debug|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

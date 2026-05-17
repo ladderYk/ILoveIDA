@@ -1,8 +1,30 @@
 [
   {
-    "Name": "测试设备",
-    "Type": "modbusTcp", //协议名称
+    "Name": "娴嬭瘯璁惧",
+    "Type": "modbusTcp",
     "IP": "127.0.0.1",
-    "Port": 502
+    "Port": 502,
+    "Vals": [
+      {
+        "Name": "鍙傛暟",
+        "type": "short"
+      }
+    ],
+    "Datas": [
+      {
+        "SendPort": "璇诲彇",
+        "Params": {
+          "鍦板潃": 10,
+          "闀垮害": 2
+        },
+        "Vals": [
+          {
+            "Index": 9,
+            "Len": 2,
+            "Val": "鍙傛暟"
+          }
+        ]
+      }
+    ]
   }
 ]

@@ -31,7 +31,7 @@ namespace ILoveIDA
             }
             _Client = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             _Client.SendTimeout = 1000;
-            _Client.BeginConnect(new IPEndPoint(IPAddress.Parse(agv.IP),agv.Port), AsyncConnectCallback, _Client);
+            _Client.BeginConnect(new IPEndPoint(IPAddress.Parse(agv.IP), agv.Port), AsyncConnectCallback, _Client);
         }
         public void Disconnect()
         {
@@ -39,13 +39,13 @@ namespace ILoveIDA
             {
                 _Client.Shutdown(SocketShutdown.Both);
                 //_Client.Close();
+            }
                 IsConnect = false;
                 ConnectedCallback onConnectedCallback = this.OnConnectedCallback;
                 if (onConnectedCallback != null)
                 {
                     onConnectedCallback(agv, "断开连接", false);
                 }
-            }
         }
         private void AsyncConnectCallback(IAsyncResult ar)
         {
@@ -107,14 +107,21 @@ namespace ILoveIDA
         }
         public byte[] SendBytes(byte[] request)
         {
-            if (IsConnect)
+            try
             {
-                _Client.Send(request);
-                byte[] _buffer = new byte[1024];
-                int bytesReceived = _Client.Receive(_buffer);
-                byte[] response = new byte[bytesReceived];
-                Array.Copy(_buffer, response, bytesReceived);
-                return response;
+                if (IsConnect && agv.IsConnected)
+                {
+                    _Client.Send(request);
+                    byte[] _buffer = new byte[1024];
+                    int bytesReceived = _Client.Receive(_buffer);
+                    byte[] response = new byte[bytesReceived];
+                    Array.Copy(_buffer, response, bytesReceived);
+                    return response;
+                }
+            }
+            catch (SocketException ex)
+            {
+                Disconnect();
             }
             return null;
         }

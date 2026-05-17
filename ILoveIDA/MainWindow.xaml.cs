@@ -95,7 +95,10 @@ namespace ILoveIDA
         }
         private void Button_Click(object sender, RoutedEventArgs e)
         {
+            if (IsRun)
+                return;
             IsRun = true;
+
             foreach (DeviceModel device in Devices)
             {
                 ResolveDataUtil.OnGetAGVState(device);
@@ -104,6 +107,8 @@ namespace ILoveIDA
         }
         private void Button_Click_1(object sender, RoutedEventArgs e)
         {
+            if (!IsRun)
+                return;
             IsRun = false;
 
             foreach (DeviceModel device in Devices)

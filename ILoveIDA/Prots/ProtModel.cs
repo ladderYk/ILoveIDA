@@ -63,6 +63,10 @@ namespace ILoveIDA.Prots
             }
             return array;
         }
+        public ProtSendParam FindParamByName(string name)
+        {
+            return Params.FirstOrDefault(send => send.Name == name);
+        }
     }
     // 报文参数
     public class ProtSendParam

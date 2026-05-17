@@ -106,6 +106,9 @@
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
+    <None Include="Prots\Config_bak1.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="Prots\Config_bak.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
