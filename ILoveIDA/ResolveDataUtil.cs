@@ -77,20 +77,32 @@ namespace ILoveIDA
                             ProtSend protSend = type.FindSendByName(data.SendPort);
                             List<byte> sendByts = protSend.DataToBytes();
                             // 根据参数配置报文
-                            foreach (string param in data.Params.Keys)
+                            int len = 0;
+                            foreach(ProtSendParam param in protSend.Params)
                             {
-                                ProtSendParam sendParam = protSend.FindParamByName(param);
-                                if (sendParam != null)
+                                if(!data.Params.ContainsKey(param.Name))
                                 {
-                                    short val = Convert.ToInt16(data.Params[param]);
-                                    sendByts.InsertRange(sendParam.Index, BitConverter.GetBytes(val).Reverse().ToArray());
+                                    continue;
                                 }
+                                short val = Convert.ToInt16(data.Params[param.Name]);
+                                sendByts.InsertRange(param.Index + len, BitConverter.GetBytes(val).Reverse().ToArray());
+                                len += 1;
                             }
+                            //foreach (string param in data.Params.Keys)
+                            //{
+                            //    ProtSendParam sendParam = protSend.FindParamByName(param);
+                            //    if (sendParam != null)
+                            //    {
+                            //        short val = Convert.ToInt16(data.Params[param]);
+                            //        sendByts.InsertRange(sendParam.Index + len, BitConverter.GetBytes(val).Reverse().ToArray());
+                            //        len += 1;
+                            //    }
+                            //}
                             // 发送并接收数据
                             byte[] bys = agv.Client.SendBytes(sendByts.ToArray());
                             if (bys == null)
                                 continue;
-                            // 判断条件，解析结果
+                            // 判断条件，解析结果 
                             ProtRecv protRecv = type.FindRecvByName(protSend.Recv);
                             if (protRecv != null)
                             {
@@ -152,13 +164,57 @@ namespace ILoveIDA
             }
             bool showErr = agv.IsConnected && !result;
 
-            agv.IsConnected = result;
             if (result)
             {
                 //Utils.AddRtMsg("AGV" + agv.Name + "[" + agv.IP + "]连接成功！");
                 //MagneticMapView.MapVM.PutAgvPosition(agv.Name, "#FF32cd32");
                 //Utils.SaveErrorLog(DateTime.Now.ToString() + "  【" + agv.Name + "】 连接成功" + Constants.vbCrLf);
                 //OnGetData(agv);
+                ProtModel type = MainWindow.findByName(agv.Type);
+                // 判断是否有握手报文
+                foreach (string send in type.Hands)
+                {
+                    ProtSend protSend = type.FindSendByName(send);
+                    if (protSend == null)
+                    {
+                        agv.Client.Disconnect();
+                        return;
+                    }
+                    byte[] bys = agv.Client.SendHandBytes(protSend.DataToBytes().ToArray());
+                    ProtRecv protRecv = type.FindRecvByName(protSend.Recv);
+                    if (protRecv != null)
+                    {
+                        if (bys.Length != protRecv.Len)
+                        {
+                            Console.WriteLine("响应长度不足");
+                            agv.Client.Disconnect();
+                            return;
+                        }
+                        foreach (ProtRecvCond s in protRecv.Conds)
+                        {
+                            if (s.Anal[0].ToString() == "!=" && bys[s.Index] != Convert.ToByte(s.Anal[1].ToString(), 16))
+                            {
+                                Console.WriteLine("错误" + s.Anal[2].ToString());
+                                agv.Client.Disconnect();
+                                return;
+                            }
+                            if (s.Anal[0].ToString() == "==" && bys[s.Index] == Convert.ToByte(s.Anal[1].ToString(), 16))
+                            {
+                                Console.WriteLine("错误" + s.Anal[2].ToString());
+                                agv.Client.Disconnect();
+                                return;
+                            }
+                        }
+                    }
+                    //if (bys.Length != model.RecvProts[0].Len)
+                    //{
+                    //    Console.WriteLine("响应长度不足");
+                    //    client.Disconnect();
+                    //    return;
+                    //}
+                }
+                agv.IsConnected = result;
+
                 return;
             }
             //Websocket.WebsocketVM.Instance.SendData("online", new JObject { { "online", false }, { "name", agv.Name } }.ToString());

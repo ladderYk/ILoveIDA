@@ -125,7 +125,7 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties prots_4device_1json__JsonSchema="https://acp-protocol.dev/schemas/v1/primer.schema.json" />
+      <UserProperties prots_4device_1json__JsonSchema="json" />
     </VisualStudio>
   </ProjectExtensions>
 </Project>

@@ -125,5 +125,25 @@ namespace ILoveIDA
             }
             return null;
         }
+        public byte[] SendHandBytes(byte[] request)
+        {
+            try
+            {
+                if (_Client.Connected)
+                {
+                    _Client.Send(request);
+                    byte[] _buffer = new byte[1024];
+                    int bytesReceived = _Client.Receive(_buffer);
+                    byte[] response = new byte[bytesReceived];
+                    Array.Copy(_buffer, response, bytesReceived);
+                    return response;
+                }
+            }
+            catch (SocketException ex)
+            {
+                Disconnect();
+            }
+            return null;
+        }
     }
 }
