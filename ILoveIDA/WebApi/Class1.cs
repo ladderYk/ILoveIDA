@@ -22,7 +22,15 @@ namespace ILoveIDA.WebApi
             .WithHeader("Access-Control-Allow-Origin", "*")
             .WithHeader("Access-Control-Allow-Methods", "POST,GET,OPTIONS")
             .WithHeader("Access-Control-Allow-Headers", "Accept, Origin, Content-type"));
+            Get("/", d =>
+            {
+                return Response.AsFile(curDir + "/dist/index.html" as String);
+            });
 
+            Get("/{fileName*}", parameters =>
+            {
+                return Response.AsFile(curDir + "/dist/" + parameters.fileName as String);
+            });
             Get("/data", d =>
             {
 

@@ -1,4 +1,5 @@
 ﻿using ILoveIDA.Prots;
+using ILoveIDA.ViewModels;
 using Nancy.Hosting.Self;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -27,7 +28,7 @@ namespace ILoveIDA
     {
         public static List<DeviceModel> Devices { get; set; } = new List<DeviceModel>();
 
-        public static List<ProtModel> prots = new List<ProtModel>();
+        public static List<ProtModel> Prots = new List<ProtModel>();
         public static bool IsRun = false;
 
         // 根目录地址
@@ -67,7 +68,7 @@ namespace ILoveIDA
                     foreach (JObject arr in arrs)
                     {
                         ProtModel prot = arr.ToObject<ProtModel>();
-                        prots.Add(prot);
+                        Prots.Add(prot);
                     }
                 }
             }
@@ -88,10 +89,17 @@ namespace ILoveIDA
 
             NancyHost host = new NancyHost(new Uri(url));
             host.Start();
+
+            webView.CoreWebView2InitializationCompleted += CoreWebView2InitializationCompleted;
+        }
+        private void CoreWebView2InitializationCompleted(object sender, EventArgs e)
+        {
+            webView.CoreWebView2.AddHostObjectToScript("Prot", new ProtVM());
+            webView.CoreWebView2.AddHostObjectToScript("Device", new DeviceVM());
         }
         public static  ProtModel findByName(string name)
         {
-            return prots.FirstOrDefault(prot => prot.Name == name);
+            return Prots.FirstOrDefault(prot => prot.Name == name);
         }
         private void Button_Click(object sender, RoutedEventArgs e)
         {

@@ -30,6 +30,8 @@ namespace ILoveIDA
             {
                 if (!agv.IsConnected && !agv.IsReg)
                 {
+                    agv.IsReg = true;
+
                     ProtModel type = MainWindow.findByName(agv.Type);
                     if (type != null)
                     {
@@ -41,7 +43,6 @@ namespace ILoveIDA
                     }
                     //if (agv.tcpClient == null)
                     //    agv.tcpClient = new AsyncTcpClient(agv);
-                    agv.IsReg = true;
                     // agv.tcpClient.OnConnectedCallback += ResolveDataUtil.OnConnectedCallback;
                     //agv.tcpClient.ConnectServer();
                     //Utils.AddErr(agv.Name, "连接中", "100");
@@ -216,6 +217,10 @@ namespace ILoveIDA
                 agv.IsConnected = result;
 
                 return;
+            }
+            else
+            {
+                agv.IsConnected = result;
             }
             //Websocket.WebsocketVM.Instance.SendData("online", new JObject { { "online", false }, { "name", agv.Name } }.ToString());
             // Utils.AddRtMsg("AGV" + agv.Name + "[" + agv.IP + "]连接失败：" + msg + "！", 1);
