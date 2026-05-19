@@ -17,39 +17,80 @@
                 <el-input v-model="Prots.Name" placeholder="报文名称" style="width: 200px" />
                 <el-button size="small" :icon="Plus" :onclick="onAddItem1">添加</el-button>
                 <el-button size="small" :icon="Refresh">清空</el-button>
-                <el-button size="small" :icon="Refresh" :onclick="onExpItem1">导出</el-button>
-                <el-button size="small" :icon="Refresh" :onclick="onExpItem2">生成</el-button>
-                <el-button :onclick="showConfigs">参数({{ Prots.Configs.length }})</el-button>
-                <el-button size="small" :icon="Plus" :onclick="onTest">测试</el-button>
             </el-space>
 
-            <el-scrollbar v-if="Prots.List.length > 0" style="height: calc(100% - 60px)" aria-orientation="vertical">
+            <el-scrollbar style="height: calc(100% - 60px)" aria-orientation="vertical">
                 <div style="overflow-x: hidden;">
-                    <el-row>
-                        <el-col :span="3" v-for="(data, i) in Prots.List">
-                            <el-card shadow="hover" body-style="padding: 15px">
-                                <div class="flex">
-                                    <span>
-                                        {{ i + 1 }}
-                                    </span>
-                                    <el-button size="small" :icon="Close" title="删除" @click.prevent="deleteRow1(i)" />
-                                </div>
-                                <el-input v-model="data[0]" placeholder="值" />
-                                <el-input v-model="data[1]" placeholder="说明" />
-                            </el-card>
+                    <el-row :gutter="10">
+                        <el-col :span="12">
+                            <el-table :data="Prots.List" table-layout="auto" :border="true">
+                                <el-table-column label="下标">
+                                    <template #default="scope">
+                                        <el-input-number v-model="scope.row.Index" autocomplete="off" min="0"
+                                        controls-position="right"
+                                            style="width: 100px" />
+                                    </template>
+                                </el-table-column>
+                                <el-table-column label="长度">
+                                    <template #default="scope">
+                                        <el-input-number v-model="scope.row.Len" autocomplete="off" min="0"
+                                        controls-position="right"
+                                            style="width: 100px" />
+                                    </template>
+                                </el-table-column>
+                                <el-table-column label="类型">
+                                    <template #default="scope">
+                                        <el-input v-model="scope.row.Type" autocomplete="off" />
+                                    </template>
+                                </el-table-column>
+                                <el-table-column label="值">
+                                    <template #default="scope">
+                                        <el-input v-model="scope.row.Anal" autocomplete="off" />
+                                    </template>
+                                </el-table-column>
+                                <el-table-column label="操作">
+                                    <template #default="scope">
+                                        <el-button size="small" :icon="Close"
+                                            @click.prevent="deleteRow1(scope.$index)" />
+                                    </template>
+                                </el-table-column>
+                            </el-table>
                         </el-col>
-                        <el-col :span="3">
-                            <el-card style="margin-bottom: 10px;height: 134px;" shadow="hover"
-                                body-style="padding: 15px">
-                                <el-button size="small" :icon="Plus" :onclick="onAddItem1">添加</el-button>
-                            </el-card>
+                        <el-col :span="12">
+                            <el-table :data="Prots.Configs" table-layout="auto" :border="true">
+                                <el-table-column label="下标">
+                                    <template #default="scope">
+                                        <el-input-number v-model="scope.row.Index" autocomplete="off" min="0"
+                                        controls-position="right"
+                                            style="width: 100px" />
+                                    </template>
+                                </el-table-column>
+                                <el-table-column label="长度">
+                                    <template #default="scope">
+                                        <el-input-number v-model="scope.row.Len" autocomplete="off" min="0"
+                                        controls-position="right"
+                                            style="width: 100px" />
+                                    </template>
+                                </el-table-column>
+                                <el-table-column label="值">
+                                    <template #default="scope">
+                                        <el-input v-model="scope.row.Val" autocomplete="off" />
+                                    </template>
+                                </el-table-column>
+                                <el-table-column label="操作">
+                                    <template #default="scope">
+                                        <el-button size="small" :icon="Close"
+                                            @click.prevent="deleteRow2(scope.$index)" />
+                                    </template>
+                                </el-table-column>
+                            </el-table>
                         </el-col>
                     </el-row>
                 </div>
             </el-scrollbar>
         </el-col>
     </el-row>
-     <el-dialog v-model="dialogFormVisible" title="参数配置" width="800">
+    <el-dialog v-model="dialogFormVisible" title="参数配置" width="800">
         <el-button size="small" :icon="Plus" :onclick="onAddItem2">添加</el-button>
         <el-table :data="Prots.Configs" table-layout="auto">
             <el-table-column label="名称">
@@ -70,7 +111,7 @@
                         <el-option label="下拉选择" value="Sel" />
                         <el-option label="系统变量" value="Val" />
                     </el-select> -->
-                                        <el-input v-model="scope.row.Type" autocomplete="off" />
+                    <el-input v-model="scope.row.Type" autocomplete="off" />
                 </template>
             </el-table-column>
             <el-table-column label="值">
@@ -234,8 +275,8 @@ const options = ref([]);
 const handleNodeClick = (data) => {
     var d = { ...data };
     Prots.Name = d.Name;
-    var List = d.Datas?.map(d => { return { ...d } });
-    var Configs = d.Params?.map(d => { return { ...d } });
+    var List = d.Conds?.map(d => { return { ...d } });
+    var Configs = d.Vals?.map(d => { return { ...d } });
     Prots.List = List ? [...List] : [];
     Prots.Configs = Configs ? [...Configs] : [];
 }

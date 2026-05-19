@@ -15,8 +15,8 @@
                     </el-card>
                 </el-col>
                 <el-col :span="3">
-                    <el-card style="margin-bottom: 10px;height: 134px;" shadow="hover" body-style="padding: 15px">
-                        <el-button size="small" :icon="Plus" :onclick="onAddItem1">添加</el-button>
+                    <el-card style="margin-bottom: 10px;height: 134px;" shadow="hover" body-style="padding: 15px;text-align:center;">
+                        <el-button size="large" :icon="Plus" :onclick="onAddItem1">添加</el-button>
                     </el-card>
                 </el-col>
             </el-row>
@@ -34,6 +34,9 @@ watch(() => props.list, (newVal, oldVal) => {
 });
 const onAddItem1 = () => {
     list.value.push({});
+}
+const deleteRow1 = (index) => {
+    list.value.splice(index, 1);
 }
 </script>
 <style scoped>

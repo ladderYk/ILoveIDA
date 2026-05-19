@@ -26,8 +26,51 @@
             <el-scrollbar v-if="Prots.List.length > 0" style="height: calc(100% - 60px)" aria-orientation="vertical">
                 <div style="overflow-x: hidden;">
                     <el-row>
-                        <el-col :span="3" v-for="(data, i) in Prots.List">
-                            <el-card shadow="hover" body-style="padding: 15px">
+                        <template v-for="(data, i) in Prots.List">
+                            <el-col :span="3">
+                                <el-card shadow="hover" body-style="padding: 15px">
+                                    <div class="flex">
+                                        <span>
+                                            {{ i + 1 }}
+                                        </span>
+                                        <el-button size="small" :icon="Close" title="删除"
+                                            @click.prevent="deleteRow1(i)" />
+                                    </div>
+                                    <el-input v-model="data[0]" placeholder="值" />
+                                    <el-input v-model="data[1]" placeholder="说明" />
+                                </el-card>
+                            </el-col>
+                            <el-col :span="3" v-if="Prots.Configs.find(c => c.Index == i + 1)">
+                                <el-card shadow="hover" body-style="padding: 15px">
+                                    <div class="flex">
+                                        <span>
+                                            {{Prots.Configs.find(c => c.Index == i + 1).Name}}
+                                        </span>
+                                        <el-button size="small" :icon="Close" title="删除" />
+                                    </div>
+                                    <el-input placeholder="值" />
+                                    <el-input v-model="Prots.Configs.find(c => c.Index == i + 1).Type"
+                                        placeholder="类型" />
+                                </el-card>
+                            </el-col>
+                        </template>
+                        <template v-for="(data, i) in Prots.Configs">
+                            <el-col :span="3" v-if="data.Index > Prots.List.length">
+                                <el-card shadow="hover" body-style="padding: 15px" body-class="hasParam">
+                                    <div class="flex">
+                                        <span>
+                                            {{ data.Name }}
+                                        </span>
+                                        <el-button size="small" :icon="Close" title="删除" />
+                                    </div>
+                                    <el-input placeholder="值" />
+                                    <el-input v-model="data.Type" placeholder="类型" />
+                                </el-card>
+                            </el-col>
+                        </template>
+                        <!-- <el-col :span="3" v-for="(data, i) in Prots.List">
+                            <el-card shadow="hover" body-style="padding: 15px"
+                                :class="Prots.Configs.find(c => c.Index == i + 1) ? 'hasParam' : ''">
                                 <div class="flex">
                                     <span>
                                         {{ i + 1 }}
@@ -37,11 +80,11 @@
                                 <el-input v-model="data[0]" placeholder="值" />
                                 <el-input v-model="data[1]" placeholder="说明" />
                             </el-card>
-                        </el-col>
+                        </el-col> -->
                         <el-col :span="3">
                             <el-card style="margin-bottom: 10px;height: 134px;" shadow="hover"
-                                body-style="padding: 15px">
-                                <el-button size="small" :icon="Plus" :onclick="onAddItem1">添加</el-button>
+                                body-style="padding: 15px;text-align:center;">
+                                <el-button size="large" :icon="Plus" :onclick="onAddItem1">添加</el-button>
                             </el-card>
                         </el-col>
                     </el-row>
@@ -49,7 +92,7 @@
             </el-scrollbar>
         </el-col>
     </el-row>
-     <el-dialog v-model="dialogFormVisible" title="参数配置" width="800">
+    <el-dialog v-model="dialogFormVisible" title="参数配置" width="800">
         <el-button size="small" :icon="Plus" :onclick="onAddItem2">添加</el-button>
         <el-table :data="Prots.Configs" table-layout="auto">
             <el-table-column label="名称">
@@ -70,7 +113,7 @@
                         <el-option label="下拉选择" value="Sel" />
                         <el-option label="系统变量" value="Val" />
                     </el-select> -->
-                                        <el-input v-model="scope.row.Type" autocomplete="off" />
+                    <el-input v-model="scope.row.Type" autocomplete="off" />
                 </template>
             </el-table-column>
             <el-table-column label="值">
@@ -419,6 +462,10 @@ const deleteRowN = (row) => {
 
 .offline {
     background-color: red;
+}
+
+.hasParam {
+    border-color: cadetblue !important;
 }
 
 /* .card-header{

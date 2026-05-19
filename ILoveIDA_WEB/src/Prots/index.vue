@@ -43,7 +43,7 @@
 // 编辑/修改，禁用/恢复
 import { onMounted, ref, reactive, computed } from "vue";
 import { Close, Link, Plus, Refresh } from '@element-plus/icons-vue'
-import { post, get } from "../utils/request";
+import { getProtList } from "../utils/dotnet";
 // import { list } from "/public/types.js";
 import SendView from "./send.vue";
 import ValView from "./val.vue";
@@ -205,15 +205,18 @@ onMounted(() => {
     // get("/DeviceList").then(data => {
     //     tableData.value = data;
     // });
-    fetch("/AGV1.json").then(v => v.json()).then(data => {
-        tableData.value = data;
-    });
-    fetch("/dType.json").then(v => v.json()).then(data => {
-        // options.value = data;
-    });
-    fetch("/Config.json").then(v => v.json()).then(data => {
+    getProtList().then(data => {
         list.value = data;        //options.value = data;
     });
+    // fetch("/AGV1.json").then(v => v.json()).then(data => {
+    //     tableData.value = data;
+    // });
+    // fetch("/dType.json").then(v => v.json()).then(data => {
+    //     // options.value = data;
+    // });
+    // fetch("/Config.json").then(v => v.json()).then(data => {
+    //     list.value = data;        //options.value = data;
+    // });
     // get("/TypeList").then(data => {
     //     options.value = data;
     // });
