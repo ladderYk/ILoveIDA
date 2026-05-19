@@ -6,16 +6,8 @@
         xmlns:local="clr-namespace:ILoveIDA"
         mc:Ignorable="d"
                 xmlns:Wpf="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf" 
-        Title="MainWindow" Height="900" Width="1400">
+        Title="MainWindow" Height="800" Width="1400">
     <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="40"/>
-            <RowDefinition/>
-        </Grid.RowDefinitions>
-        <UniformGrid Rows="1">
-            <Button Click="Button_Click" Content="开启"/>
-            <Button Click="Button_Click_1" Content="关闭"/>
-        </UniformGrid>
-        <Wpf:WebView2 Name="webView" Source="http://127.0.0.1/" Grid.Row="1"/>
+        <Wpf:WebView2 Name="webView" Source="http://127.0.0.1/" />
     </Grid>
 </Window>

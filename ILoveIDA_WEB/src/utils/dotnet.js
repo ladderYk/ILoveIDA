@@ -1,3 +1,20 @@
+export const setOn = () => {
+  if (chrome.webview) {
+    const Device = chrome.webview.hostObjects.Device;
+    Device.setOn().then();
+  }
+  return Promise.reject("错误");
+
+};
+export const setOff = () => {
+  if (chrome.webview) {
+    const Device = chrome.webview.hostObjects.Device;
+    Device.setOff().then();
+  }
+  return Promise.reject("错误");
+
+};
+
 export const addDeviceType = (form) => {
   if (chrome.webview) {
     const DeviceType = chrome.webview.hostObjects.DeviceType;

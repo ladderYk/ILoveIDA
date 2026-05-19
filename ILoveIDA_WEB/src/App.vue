@@ -6,6 +6,8 @@ import ProtsIndex from "./Prots/index.vue";
 import {
   Fold, Expand
 } from '@element-plus/icons-vue'
+import { setOn, setOff } from "./utils/dotnet";
+
 // import Home from "./pages/Index.vue";
 // import About from './About.vue'
 // import NotFound from './NotFound.vue'
@@ -41,7 +43,12 @@ onMounted(() => {
   //   textarea.value.unshift(message.data);
   // };
 });
-
+const setOnCli = () => {
+  setOn();
+}
+const setOffCli = () => {
+  setOff();
+}
 </script>
 
 <template>
@@ -50,9 +57,9 @@ onMounted(() => {
     </el-header> -->
   <el-container>
 
-    <el-header> <el-menu class="menu" :default-active="currentPath" style="width:100%" @select="handleSelect"
-        mode="horizontal" active-text-color="#1890ff" background-color="#001529" text-color="#fff"
-        :collapse="isCollapse">
+    <el-header style="display: flex;"> <el-menu class="menu" :default-active="currentPath" style="flex:1"
+        @select="handleSelect" mode="horizontal" active-text-color="#1890ff" background-color="#001529"
+        text-color="#fff" :collapse="isCollapse">
         <div class="logo">
           <!-- {{isCollapse? "NP":"NetProts"}} -->
           ILoveIDA
@@ -69,8 +76,12 @@ onMounted(() => {
           </el-icon>
           <span>设备列表</span>
         </el-menu-item>
-      </el-menu></el-header>
-
+      </el-menu>
+      <div style="display: flex;align-items: center;">
+        <el-button @click="setOnCli">开启</el-button>
+        <el-button @click="setOffCli">关闭</el-button>
+      </div>
+    </el-header>
     <el-main>
       <!-- <el-col :span="18"> -->
       <component :is="currentView" />

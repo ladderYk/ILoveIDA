@@ -15,6 +15,31 @@ namespace ILoveIDA.ViewModels
     [ComVisible(true)]
     public class DeviceVM
     {
+        public bool setOn()
+        {
+            if (MainWindow.IsRun)
+                return false;
+            MainWindow.IsRun = true;
+
+            foreach (DeviceModel device in MainWindow.Devices)
+            {
+                ResolveDataUtil.OnGetAGVState(device);
+                ResolveDataUtil.OnGetData(device);
+            }
+            return true;
+        }
+        public bool setOff()
+        {
+            if (!MainWindow.IsRun)
+                return false;
+            MainWindow.IsRun = false;
+
+            foreach (DeviceModel device in MainWindow.Devices)
+            {
+                ResolveDataUtil.Close(device);
+            }
+            return true;
+        }
         public string getDeviceList()
         {
             return req("200", "", JArray.FromObject(MainWindow.Devices));
